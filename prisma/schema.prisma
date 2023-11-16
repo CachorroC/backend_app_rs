@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Carpeta {
+  id              Int        @id @default(autoincrement())
+  numero          Int        @unique
+  llaveProceso    String?
+  nombre          String
+  idProcesos      Int[]
+  category        Category   @default(SinEspecificar)
+  fecha           DateTime?  @db.Date
+  ultimaActuacion Actuacion?
+  demanda         Demanda?
+  deudor          Deudor?
+  notas           Nota[]
+  procesos        Proceso[]
+  tareas          Tarea[]
+  juzgados        Juzgado[]  @relation("CarpetaToJuzgado")
+}
+
+model Deudor {
+  id              Int     @id @default(autoincrement())
+  cedula          String?
+  primerNombre    String
+  primerApellido  String
+  segundoNombre   String?
+  segundoApellido String?
+  direccion       String?
+  email           String?
+  telCelular      String?
+  telFijo         String?
+  carpetaNumero   Int     @unique
+  carpeta         Carpeta @relation(fields: [carpetaNumero], references: [numero])
+}
+
+model Nota {
+  id            Int      @id @default(autoincrement())
+  date          DateTime
+  createdAt     DateTime @default(now())
+  pathname      String?
+  carpetaNumero Int?
+  content       String?
+  title         String
+  updatedAt     DateTime @updatedAt
+  carpeta       Carpeta? @relation(fields: [carpetaNumero], references: [numero])
+}
+
+model Tarea {
+  id        Int        @id @default(autoincrement())
+  dueDate   DateTime?  @db.Date
+  carpetaId Int?
+  complete  Boolean
+  content   String?
+  createdAt DateTime   @default(now())
+  title     String
+  updatedAt DateTime   @updatedAt
+  subTareas SubTarea[]
+  Carpeta   Carpeta?   @relation(fields: [carpetaId], references: [numero])
+}
+
+model SubTarea {
+  text       String    @id
+  date       DateTime?
+  isComplete Boolean
+  tareaId    Int?
+  Tarea      Tarea?    @relation(fields: [tareaId], references: [id])
+}
+
+model Actuacion {
+  createdAt        DateTime  @default(now())
+  idRegActuacion   Int       @id @db.Oid
+  llaveProceso     String
+  consActuacion    Int
+  fechaActuacion   DateTime  @db.Date
+  actuacion        String
+  anotacion        String?
+  fechaInicial     DateTime? @db.Date
+  fechaRegistro    DateTime  @db.Date
+  fechaFinal       DateTime? @db.Date
+  codRegla         String
+  conDocumentos    Boolean
+  cant             Int
+  carpetaNumero    Int?      @unique
+  procesoIdProceso Int?
+  Carpeta          Carpeta?  @relation(fields: [carpetaNumero], references: [numero])
+  Proceso          Proceso?  @relation(fields: [procesoIdProceso], references: [idProceso])
+}
+
+model Demanda {
+  id                      Int         @id @default(autoincrement())
+  departamento            String?
+  capitalAdeudado         Decimal?    @db.Money
+  entregaGarantiasAbogado DateTime?   @db.Date
+  tipoProceso             TipoProceso @default(SINGULAR)
+  mandamientoPago         DateTime?   @db.Date
+  etapaProcesal           String?
+  fechaPresentacion       DateTime?   @db.Date
+  municipio               String?
+  obligacion              String[]
+  radicado                String?
+  vencimientoPagare       DateTime[]  @db.Date
+  expediente              String?
+  carpetaNumero           Int         @unique
+  despacho                String?
+  carpeta                 Carpeta     @relation(fields: [carpetaNumero], references: [numero])
+  juzgados                Juzgado[]   @relation("DemandaToJuzgado")
+}
+
+model Juzgado {
+  id       Int
+  tipo     String    @id
+  url      String
+  Proceso  Proceso[]
+  carpetas Carpeta[] @relation("CarpetaToJuzgado")
+  demanda  Demanda[] @relation("DemandaToJuzgado")
+}
+
+model Proceso {
+  idProceso            Int         @id
+  idConexion           Int
+  llaveProceso         String
+  fechaProceso         DateTime?   @db.Date
+  fechaUltimaActuacion DateTime?   @db.Date
+  despacho             String
+  departamento         String
+  sujetosProcesales    String
+  esPrivado            Boolean
+  cantFilas            Int
+  carpetaNumero        Int
+  actuaciones          Actuacion[]
+  Carpeta              Carpeta     @relation(fields: [carpetaNumero], references: [numero])
+  Juzgado              Juzgado     @relation(fields: [despacho], references: [tipo])
+}
+
+enum Category {
+  Terminados
+  LiosJuridicos
+  Bancolombia
+  Reintegra
+  Insolvencia
+  SinEspecificar
+  todos
+}
+
+enum Departamento {
+  BOGOTA
+  CUNDINAMARCA
+  META
+  ANTIOQUIA
+  ATLANTICO
+}
+
+enum TipoProceso {
+  HIPOTECARIO
+  PRENDARIO
+  SINGULAR
+  ACUMULADO
+}

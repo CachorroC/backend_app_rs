@@ -1,0 +1,43 @@
+{
+  "ingress": [
+    {
+      "hostname": "app.rsasesorjuridico.com",
+      "originRequest": {
+        "connectTimeout": 60,
+        "keepAliveTimeout": 120,
+        "noTLSVerify": true
+      },
+      "service": "http://app:3000"
+    },
+    {
+      "hostname": "data.rsasesorjuridico.com",
+      "originRequest": {
+        "proxyType": ""
+      },
+      "service": "tcp://postgres"
+    },
+    {
+      "hostname": "nube.rsasesorjuridico.com",
+      "originRequest": {
+        "http2Origin": true,
+        "noTLSVerify": true,
+        "originServerName": ""
+      },
+      "service": "http://192.168.1.195"
+    },
+    {
+      "hostname": "nextcloud.rsasesorjuridico.com",
+      "originRequest": {
+        "http2Origin": true,
+        "noTLSVerify": true
+      },
+      "service": "http://nextcloud"
+    },
+    {
+      "service": "http_status:404"
+    }
+  ],
+  "warp-routing": {
+    "enabled": true
+  }
+}

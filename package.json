@@ -3,22 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "lint": "next lint --fix && next lint",
+    "devbuild": "pnpm run lint && next build",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "URL=betapi.rsasesorjuridico.com NEXTAUTH_URL=https://betaapi.rsasesorjuridico.com PREFIX=betaapi PORT=1509 next dev",
+    "start": "PORT=1509 next start",
+    "db:migrate": "prisma migrate dev --name init --create-only && prisma generate",
+    "db:push": "prisma db push"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "14.0.2"
-  },
-  "devDependencies": {
-    "typescript": "^5",
+    "@prisma/client": "^5.6.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.0.2"
+    "eslint-config-next": "14.0.2",
+    "mongodb": "^6.2.0",
+    "next": "14.0.2",
+    "prisma": "^5.6.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "typescript": "^5",
+    "zod": "^3.22.4"
   }
 }

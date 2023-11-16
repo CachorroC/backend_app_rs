@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["dom", "dom.iterable", "esnext", "WebWorker"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,7 +19,14 @@
       }
     ],
     "paths": {
-      "#@/*": ["./src/*"]
+      "types/*": [
+        "./src/lib/types/*"
+      ],
+      "project/*": [
+        "./src/lib/project/*"
+      ],
+      "#@/*": ["./src/*"],
+      "#@api": ["./src/app/api/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

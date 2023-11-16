@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+
+  api:
+    image: api
+    hostname: api
+    restart: always
+    container_name: api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      PORT: 1509
+      MONGODB_URI: mongodb+srv://cachorro_cami:Tengo1amo@cluster0.ffbyjzl.mongodb.net/?retryWrites=true&w=majority
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:Tengo1amo@postgres:5432/RyS?schema=public
+    ports:
+      - 1509:1509
+    expose:
+      - 1509
+    networks:
+      - internal
+
+networks:
+  internal:
+    external: true
+    name: internal

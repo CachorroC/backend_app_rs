@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Deudor" ALTER COLUMN "telCelular" SET DATA TYPE TEXT,
+ALTER COLUMN "telFijo" SET DATA TYPE TEXT;
