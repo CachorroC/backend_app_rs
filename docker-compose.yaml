@@ -16,8 +16,6 @@ services:
       MONGODB_URI: mongodb+srv://cachorro_cami:Tengo1amo@cluster0.ffbyjzl.mongodb.net/?retryWrites=true&w=majority
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:Tengo1amo@postgres:5432/RyS?schema=public
-    ports:
-      - 1509:1509
     expose:
       - 1509
     networks:
