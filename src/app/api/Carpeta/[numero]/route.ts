@@ -18,13 +18,18 @@ export async function GET (
           numero: numero
         },
         include: {
-          demanda        : true,
           deudor         : true,
           ultimaActuacion: true,
           juzgados       : true,
           procesos       : true,
           notas          : true,
-          tareas         : {
+          demandas       : {
+            include: {
+              notificacion     : true,
+              medidasCautelares: true
+            }
+          },
+          tareas: {
             include: {
               subTareas: true
             }

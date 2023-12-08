@@ -19,7 +19,10 @@ export interface Data {
   paginacion: Paginacion;
 }
 
-export interface intActuacion {
+export interface intActuacion
+{
+  carpetaNumero: number | null;
+  createdAt: Date;
   idRegActuacion: number;
   llaveProceso: string;
   consActuacion: number;
@@ -32,6 +35,9 @@ export interface intActuacion {
   codRegla: CodRegla;
   conDocumentos: boolean;
   cant: number;
+
+  idProceso: number;
+  isUltimaAct: boolean;
 }
 
 export type CodRegla = '00                              ';

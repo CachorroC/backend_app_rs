@@ -42,7 +42,7 @@ function sleep(
 
 
 async function* generateSequence() {
-
+const carpetasBuilder = new Set();
   for ( const rawCarpeta of carpetas ) {
     const carpeta = new CarpetaBuilder(
       rawCarpeta
@@ -52,11 +52,13 @@ async function* generateSequence() {
     );
     await carpeta.getProcesos();
     await carpeta.getActuaciones();
+    carpetasBuilder.add(carpeta)
+
     yield JSON.stringify(
-      carpeta
+      Array.from(carpetasBuilder)
     );
 
-  }
+  }>
 
 }
 

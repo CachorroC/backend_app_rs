@@ -1,5 +1,6 @@
-import { intDeudor } from 'types/int-carpeta';
-import { RawDeudor } from 'types/raw-carpeta';
+import { intDeudor } from 'types/carpetas';
+import { DeudorRaw } from 'types/int-carpeta';
+
 
 export class Tel {
   fijo: number | null;
@@ -47,8 +48,8 @@ export class Tel {
 export class ClassDeudor implements intDeudor {
   constructor (
     {
-      cedula, direccion, email, nombre, telefonos = ''
-    }: RawDeudor
+      cedula, direccion, email, nombre, telefono = ''
+    }: DeudorRaw
   ) {
     this.cedula = Number(
       cedula
@@ -61,7 +62,7 @@ export class ClassDeudor implements intDeudor {
       : null;
     this.tel = new Tel(
       String(
-        telefonos
+        telefono
       )
     );
     this.nombre = nombre;
@@ -142,7 +143,7 @@ export class ClassDeudor implements intDeudor {
   segundoNombre: string | null;
   primerApellido: string;
   segundoApellido: string | null;
-  cedula?: number;
+  cedula: number;
   direccion: string | null;
   email: string | null;
 }

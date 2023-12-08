@@ -1,91 +1,106 @@
-import { intJuzgado } from 'types/carpetas';
-import { intActuacion, intCarpeta, intCategory, intCodeudor, intDemanda, intDeudor, intProceso, intTipoProceso } from 'types/int-carpeta';
-import { RawCarpeta } from 'types/raw-carpeta';
-import { ClassDemanda, NewJuzgado } from './demanda';
+import { Juzgado, Category, TipoProceso, Codeudor } from '@prisma/client';
+import { intActuacion, ConsultaActuacion } from '../types/actuaciones';
+import { intProceso, Data } from '../types/procesos';
+import { ClassDemanda, NewJuzgado, tipoProcesoBuilder } from './demanda';
 import { ClassDeudor } from './deudor';
-import { ConsultaNumeroRadicacion } from 'types/procesos';
-import { ConsultaActuacion } from 'types/actuaciones';
+import { CarpetaRaw, DemandaRaw, IntCarpeta, IntDemanda, IntDeudor } from 'types/int-carpeta';
 
-export class CarpetaBuilder implements intCarpeta {
-  procesos?: intProceso[];
-  revisado: boolean;
-  updatedAt: Date;
-  terminado: boolean;
-  ultimaActuacion?: intActuacion;
-  actuaciones?: intActuacion[];
-  juzgados?: intJuzgado[];
-  category: intCategory;
-  demanda: intDemanda;
-  deudor: intDeudor;
+
+export class CarpetaBuilder implements IntCarpeta {
+  actuaciones: { carpetaNumero: number | null; isUltimaAct: boolean; createdAt: Date; idRegActuacion: number; llaveProceso: string; consActuacion: number; fechaActuacion: Date; actuacion: string; anotacion: string | null; fechaInicial: Date | null; fechaRegistro: Date; fechaFinal: Date | null; codRegla: string; conDocumentos: boolean; cant: number; idProceso: number; }[] | null;
+  juzgados: Juzgado[] | null;
+  codeudor: Codeudor | null;
+  demanda: DemandaRaw;
+  demandas: IntDemanda[];
   numero: number;
-  llaveProceso: string = 'SinEspecificar';
+  llaveProceso: string;
+  fecha: Date | null;
+  ultimaActuacion: intActuacion | null;
+  category: Category;
+  revisado: boolean;
+  terminado: boolean;
+  tipoProceso: TipoProceso;
+  deudor: IntDeudor;
+  cc: number;
+  procesos: intProceso[] | null;
+  idProcesos: number[] ;
   nombre: string;
-  idProcesos?: number[];
-  fecha?: Date;
-  codeudor?: intCodeudor;
+
   constructor (
     {
-      demanda, deudor, numero, category, codeudor
-    }: RawCarpeta
+      numero, deudor, category, codeudor, demanda
+    }: CarpetaRaw
   ) {
-    this.nombre = deudor.nombre;
+    const newDemanda = new ClassDemanda(
+      demanda, numero
+    );
     this.numero = numero;
+    this.nombre = deudor.nombre;
     this.category = category;
-    this.updatedAt = new Date();
     this.revisado = category === 'Terminados'
       ? true
       : false;
-    this.terminado = category === 'Terminados'
-      ? true
-      : false;
-    this.llaveProceso = demanda.expediente
-      ? String(
-        demanda.expediente
+    this.codeudor = codeudor
+      ?{
+          nombre: codeudor.nombre
+            ? String(
+              codeudor.nombre
+            )
+            : null
+          , cedula: codeudor.cedula
+            ? String(
+              codeudor.cedula
+            )
+            : null
+          , direccion: codeudor.direccion
+            ? String(
+              codeudor.direccion
+            )
+            : null
+          , telefono: codeudor.telefono
+            ? String(
+              codeudor.telefono
+            )
+            : null
+          , id           : this.numero
+          , carpetaNumero: this.numero
+        }
+      : null;
+    this.tipoProceso = demanda.tipoProceso
+      ? tipoProcesoBuilder(
+        demanda.tipoProceso
       )
-      : 'SinEspecificar';
-    this.demanda = new ClassDemanda(
-      demanda
-    );
+      : 'SINGULAR';
     this.deudor = new ClassDeudor(
       deudor
     );
-    this.tipoProceso = demanda.tipoProceso as intTipoProceso;
-
-    if ( codeudor ) {
-      this.codeudor = {
-        cedula: codeudor.cedula
-          ? String(
-            codeudor.cedula
-          )
-          : null,
-        direccion: codeudor.direccion
-          ? String(
-            codeudor.direccion
-          )
-          : null,
-        nombre: codeudor.nombre
-          ? String(
-            codeudor.nombre
-          )
-          : null,
-        telefonos: codeudor.telefonos
-          ? String(
-            codeudor.telefonos
-          )
-          : null,
-        id           : this.numero,
-        carpetaNumero: this.numero
-      };
+    this.demanda = demanda;
+    this.demandas = [
+      newDemanda
+    ];
+    this.terminado = category === 'Terminados'
+      ? true
+      : false;
+    this.cc = Number(
+      deudor.cedula
+    );
+    this.actuaciones = null;
+    this.juzgados = null;
+    this.idProcesos = [];
+    this.procesos = null;
+    this.ultimaActuacion = null;
+    this.fecha = null;
+    this.llaveProceso = demanda.llaveProceso;
+  }
+  set _llaveProceso (
+    expediente: string
+  ) {
+    if ( expediente.length === 23 ) {
+      this.llaveProceso = expediente;
     }
   }
-  idRegUltimaAct?: number | undefined;
-  tipoProceso: intTipoProceso;
 
-  async  next () {
-
-  }
   async getProcesos () {
-
     try {
       if ( !this.llaveProceso ) {
         throw new Error(
@@ -95,9 +110,6 @@ export class CarpetaBuilder implements intCarpeta {
 
       const request = await fetch(
         `https://consultaprocesos.ramajudicial.gov.co:448/api/v2/Procesos/Consulta/NumeroRadicacion?numero=${ this.llaveProceso }&SoloActivos=false&pagina=1`,
-      );
-      console.log(
-        request
       );
 
       if ( !request.ok ) {
@@ -113,51 +125,56 @@ export class CarpetaBuilder implements intCarpeta {
       }
 
       const consultaProcesos
-        = ( await request.json() ) as ConsultaNumeroRadicacion;
+        = ( await request.json() ) as Data;
 
       const {
         procesos
       } = consultaProcesos;
 
-      if ( procesos ) {
-
-        this.procesos = procesos.map(
-          (
+      this.procesos = procesos.map(
+        (
+          proceso
+        ) => {
+          return {
+            ...proceso
+            , fechaProceso: proceso.fechaProceso
+              ? new Date(
+                proceso.fechaProceso
+              )
+              : null
+            , fechaUltimaActuacion: proceso.fechaUltimaActuacion
+              ? new Date(
+                proceso.fechaUltimaActuacion
+              )
+              : null
+          };
+        }
+      );
+      this.idProcesos = procesos.map(
+        (
+          prc
+        ) => {
+          return prc.idProceso;
+        }
+      );
+      this.juzgados = procesos.map(
+        (
+          proceso
+        ) => {
+          return new NewJuzgado(
             proceso
-          ) => {
-            return {
-              ...proceso,
-              fechaProceso: proceso.fechaProceso
-                ? new Date(
-                  proceso.fechaProceso
-                )
-                : null,
-              fechaUltimaActuacion: proceso.fechaUltimaActuacion
-                ? new Date(
-                  proceso.fechaUltimaActuacion
-                )
-                : null
-            };
-          }
-        );
-        this.idProcesos = procesos.map(
-          (
-            prc
-          ) => {
-            return prc.idProceso;
-          }
-        );
-        this.juzgados = procesos.map(
-          (
-            proceso
-          ) => {
-            return new NewJuzgado(
-              proceso
-            );
-          }
-        );
-      }
-
+          );
+        }
+      );
+      this.demandas = procesos.map(
+        (
+          proceso
+        ) => {
+          return new ClassDemanda(
+            this.demanda, this.numero, proceso
+          );
+        }
+      );
       return this.procesos;
     } catch ( error ) {
       console.log(
@@ -166,7 +183,6 @@ export class CarpetaBuilder implements intCarpeta {
       return null;
     }
   }
-
   async getActuaciones () {
     try {
       if ( !this.procesos || this.procesos.length === 0 ) {
@@ -216,6 +232,14 @@ export class CarpetaBuilder implements intCarpeta {
           const incomingMonth = incomingDate.getMonth();
 
           const incomingDay = incomingDate.getDate();
+          console.log(
+            `${ this.numero } => la nueva fecha de la actuacion es: ${ new Date(
+              incomingYear,
+              incomingMonth,
+              incomingDay,
+            ) } y el timezone offset es  ${ incomingDate.getTimezoneOffset() }
+          raw: ${ ultimaActuacion.fechaActuacion }`,
+          );
 
 
 
@@ -238,77 +262,45 @@ export class CarpetaBuilder implements intCarpeta {
             || this.fecha < incomingDate
             || this.fecha.toString() === 'Invalid Date'
           ) {
-            console.log(
-              `${ this.numero } => la nueva fecha de la actuacion es: ${ new Date(
-                incomingYear,
-                incomingMonth,
-                incomingDay,
-              ) } y el timezone offset es  ${ new Date(
-                incomingYear,
-                incomingMonth,
-                incomingDay,
-              )
-                .getTimezoneOffset() }
-          raw: ${ ultimaActuacion.fechaActuacion }`,
-            );
-
-
-
             this.fecha = new Date(
               ultimaActuacion.fechaActuacion
             );
+            this.ultimaActuacion = {
+              ...ultimaActuacion
+              , idProceso  : proceso.idProceso
+              , isUltimaAct: ultimaActuacion.cant === ultimaActuacion.consActuacion
+                ? true
+                : false
+            };
 
           }
 
-          this.ultimaActuacion = {
-            ...ultimaActuacion,
-            createdAt     : new Date(),
-            fechaActuacion: new Date(
-              ultimaActuacion.fechaActuacion
-            ),
-            fechaRegistro: new Date(
-              ultimaActuacion.fechaRegistro
-            ),
-            fechaFinal: ultimaActuacion.fechaFinal
-              ? new Date(
-                ultimaActuacion.fechaFinal
-              )
-              : null,
-            fechaInicial: ultimaActuacion.fechaInicial
-              ? new Date(
-                ultimaActuacion.fechaInicial
-              )
-              : null,
-            idProceso  : proceso.idProceso,
-            isUltimaAct: ultimaActuacion.cant === ultimaActuacion.consActuacion
-              ? true
-              : false
-          };
           actuaciones.forEach(
             (
               actuacion
             ) => {
               actuacionesMap.add(
                 {
-                  ...actuacion,
-                  idProceso: proceso.idProceso,
-                  isUltimaAct:
+                  ...actuacion
+                  , idProceso: proceso.idProceso
+                  , isUltimaAct:
                     actuacion.cant === actuacion.consActuacion
                       ? true
-                      : false,
-                  createdAt     : new Date,
-                  fechaActuacion: new Date(
+                      : false
+                  , carpetaNumero : this.numero
+                  , createdAt     : new Date
+                  , fechaActuacion: new Date(
                     actuacion.fechaActuacion
-                  ),
-                  fechaRegistro: new Date(
+                  )
+                  , fechaRegistro: new Date(
                     actuacion.fechaRegistro
-                  ),
-                  fechaInicial: actuacion.fechaInicial
+                  )
+                  , fechaInicial: actuacion.fechaInicial
                     ? new Date(
                       actuacion.fechaInicial
                     )
-                    : null,
-                  fechaFinal: actuacion.fechaFinal
+                    : null
+                  , fechaFinal: actuacion.fechaFinal
                     ? new Date(
                       actuacion.fechaFinal
                     )

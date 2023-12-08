@@ -6,13 +6,18 @@ export async function GET () {
     const carpetas = await prisma.carpeta.findMany(
       {
         include: {
-          demanda        : true,
           deudor         : true,
           ultimaActuacion: true,
           juzgados       : true,
           procesos       : true,
           notas          : true,
-          tareas         : {
+          demandas       : {
+            include: {
+              notificacion     : true,
+              medidasCautelares: true
+            }
+          },
+          tareas: {
             include: {
               subTareas: true
             }

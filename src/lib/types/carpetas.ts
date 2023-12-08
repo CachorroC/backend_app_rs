@@ -2,6 +2,7 @@ import { WithId } from 'mongodb';
 import { intActuacion } from './actuaciones';
 import { intProceso } from './procesos';
 import { Despachos } from '../Procesos/despachos';
+import { Juzgado } from '@prisma/client';
 
 export interface NuevaCarpeta
 {
@@ -66,21 +67,44 @@ export type Category =
 export interface intDemanda
 {
   capitalAdeudado: number | null;
+  departamento: string | null;
   entregaGarantiasAbogado: Date | null;
-  etapaProcesal: null | string;
-  expediente: null | string;
-  fechaPresentacion: Date | null;
-  juzgados: intJuzgado[] | null;
-  municipio: string;
   tipoProceso: TipoProceso;
   mandamientoPago: Date | null;
-  obligacion: Array<number | string>;
-  radicado: null | string;
-  vencimientoPagare: Array<Date | null>;
-  departamento: Departamento;
-  despacho?: string;
-  sujetosProcesales?: string;
+  etapaProcesal: string | null;
+  fechaPresentacion: Date[]
+  municipio: string | null;
+  obligacion: ( number | string )[];
+  radicado: string | null;
+  vencimientoPagare: ( Date | null )[];
+  juzgado: Juzgado | null;
+  idProceso: number;
+  idConexion: number | null;
+  llaveProceso: string | null;
+  fechaProceso: Date | null;
+  fechaUltimaActuacion: Date | null;
+  sujetosProcesales: string | null;
+  esPrivado: boolean | null;
+  cantFilas: number | null;
+  notificacion: intNotificacion | null;
+  medidasCautelares: {
+    fechaOrdenaMedida: Date | null;
+    medidaSolicitada: string | null;
+  } | null;
 }
+
+export interface intNotificacion {
+  certimail: boolean | null;
+  fisico: boolean | null;
+  autoNotificado: string | null;
+  notifiers: {
+    tipo: '291' | '292';
+    fechaRecibido: Date | null;
+    resultado: boolean | null;
+    fechaAporta: Date | null;
+  }[];
+}
+
 
 export type Obligacion = number | string;
 
@@ -309,22 +333,34 @@ export const mockCarpeta: IntCarpeta = {
     capitalAdeudado        : 0,
     entregaGarantiasAbogado: new Date(),
     etapaProcesal          : null,
-    fechaPresentacion      : null,
-    municipio              : 'Bogota',
-    tipoProceso            : 'SINGULAR',
-    obligacion             : [
+    fechaPresentacion      : [
+      new Date()
+    ],
+    municipio  : 'Bogota',
+    tipoProceso: 'SINGULAR',
+    obligacion : [
       0
     ],
     radicado         : null,
     vencimientoPagare: [
       new Date()
     ],
-    expediente     : null,
-    juzgados       : null,
-    mandamientoPago: null,
+    llaveProceso        : null,
+    juzgado             : null,
+    mandamientoPago     : null,
+    idProceso           : 0,
+    idConexion          : null,
+    fechaProceso        : null,
+    fechaUltimaActuacion: null,
+    sujetosProcesales   : null,
+    esPrivado           : null,
+    cantFilas           : null,
+    notificacion        : null,
+    medidasCautelares   : null
   },
   cc      : null,
-  codeudor: null
+  codeudor: null,
+  nombre  : ''
 };
 
 function incomingStringFixer (
