@@ -1,14 +1,14 @@
 import 'server-only';
 import { cache } from 'react';
 import { sleep } from 'project/helper';
-import { intActuacion, ConsultaActuacion, Data, Message } from 'types/actuaciones';
+import { intActuacion,  Message } from 'types/actuaciones';
 import { getCarpetaByllaveProceso } from 'project/utils/Carpetas/carpetas';
 import { carpetasCollection } from '../../../connection/collections';
 import { prisma } from '../../../connection/prisma';
 
 export async function fetchActuaciones(
   idProceso: number, index: number
-) {
+): Promise<{ StatusCode: number;  Message: string; actuaciones?: intActuacion[]}> {
   try {
     await sleep(
       index
@@ -24,21 +24,21 @@ export async function fetchActuaciones(
     );
 
     if ( !request.ok ) {
-      const json = ( await request.json() ) as ConsultaActuacion;
+      const json =  await request.json();
       return json;
     }
 
-    const data = ( await request.json() ) as Data;
+    const data =  await request.json();
 
     const {
       actuaciones
     } = data;
 
-    await updateActuaciones(
+    updateActuaciones(
       actuaciones, idProceso
     );
 
-    const json: ConsultaActuacion = {
+    const json = {
       StatusCode : request.status,
       Message    : request.statusText as Message,
       actuaciones: actuaciones,
@@ -52,7 +52,7 @@ export async function fetchActuaciones(
     }
 
     console.log(
-      `${ idProceso }: : error en la  fetchActuaciones  =>  ${ error }`
+      `${ idProceso } error en la  fetchActuaciones  =>  ${ error }`
     );
 
     return {
@@ -176,7 +176,7 @@ export async function  updateActuaciones(
         },
       );
 
-      const updateCarpetaWithActuacionesToPrisma = prisma.carpeta.update(
+      const updateCarpetaWithActuacionesToPrisma = await prisma.carpeta.update(
         {
           where: {
             numero: carpeta.numero
@@ -184,26 +184,46 @@ export async function  updateActuaciones(
           data: {
             fecha: new Date(
               ultimaActuacion.actuacion
-            )
+            ),
+            revisado       : false,
+            ultimaActuacion: {
+              connectOrCreate: {
+                where: {
+                  idRegActuacion: ultimaActuacion.idRegActuacion
+                },
+                create: {
+                  ...ultimaActuacion,
+                  idProceso     : idProceso,
+                  fechaActuacion: new Date(
+                    ultimaActuacion.fechaActuacion
+                  ),
+                  fechaRegistro: new Date(
+                    ultimaActuacion.fechaRegistro
+                  ),
+                  fechaFinal: ultimaActuacion.fechaFinal
+                    ? new Date(
+                      ultimaActuacion.fechaFinal
+                    )
+                    : null,
+                  fechaInicial: ultimaActuacion.fechaInicial
+                    ? new Date(
+                      ultimaActuacion.fechaInicial
+                    )
+                    : null,
+                  isUltimaAct: ultimaActuacion.cant === ultimaActuacion.consActuacion
+                    ? true
+                    : false,
+
+
+                }
+              }
+            }
           }
         }
       );
 
       console.log(
         updateCarpetaWithActuacionesToPrisma
-      );
-
-      const updateActuacionesInPrisma = prisma.actuacion.create(
-        {
-
-          data: {
-            ...ultimaActuacion,
-            carpetaNumero: carpeta.numero
-          }
-        }
-      );
-      console.log(
-        updateActuacionesInPrisma
       );
 
       if ( !updateCarpetawithActuaciones ) {
@@ -234,6 +254,7 @@ export async function  updateActuaciones(
     return;
   }
 }
+
 
 export const deleteProcesoPrivado = async (
   {

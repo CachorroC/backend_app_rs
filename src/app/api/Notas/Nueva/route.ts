@@ -64,7 +64,7 @@ export async function POST (
       `POST en api/Notas/Nueva arrojó un error ${ error }`
     );
     return NextResponse.json(
-      error as Error
+      error
     );
   }
 }

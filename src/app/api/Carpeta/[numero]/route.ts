@@ -1,4 +1,5 @@
 import { prisma } from '#@/lib/connection/prisma';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET (
@@ -68,7 +69,59 @@ export async function PUT (
       create: incomingCarpeta
     }
   );
+
+  const mapperCookies = new Map();
+
+  const mapperHeaders = new Map();
+
+  const cookiesList = await request.cookies.getAll();
+
+  for ( const cookie of cookiesList ) {
+
+    mapperCookies.set(
+      cookie.name, cookie
+    );
+  }
+
+  const headersList = headers();
+
+
+  for ( const [
+    key,
+    value
+  ] of headersList ) {
+    mapperHeaders.set(
+      key, value
+    );
+  }
+
+  const domain = headersList.get(
+    'next-url'
+  ) ?? '';
+
+  const [
+    ,
+    firstRoute,
+    secondRoute
+  ] = domain.split(
+    '/'
+  );
+
+  const arrMap = Object.fromEntries(
+    mapperCookies
+  );
+
+  const arrHeaderMap = Object.fromEntries(
+    mapperHeaders
+  );
   return NextResponse.json(
-    updateCarpeta
+    {
+      updateCarpeta: updateCarpeta,
+      arrMap       : arrMap,
+      arrHeaderMap : arrHeaderMap,
+      domain       : domain,
+      firstRoute   : firstRoute,
+      secondRoute  : secondRoute
+    }
   );
 }

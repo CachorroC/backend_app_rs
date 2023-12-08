@@ -5,9 +5,8 @@
 //   const consultaActuacion = Convert.toConsultaActuacion(json);
 
 export interface ConsultaActuacion {
-  StatusCode: number;
-  Message: Message;
-  actuaciones?: intActuacion[];
+  actuaciones: intActuacion[];
+  paginacion: Paginacion;
 }
 
 export type Message =

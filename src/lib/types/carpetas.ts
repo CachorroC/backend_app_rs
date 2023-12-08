@@ -33,17 +33,18 @@ export interface NuevaCarpeta
 
 export interface IntCarpeta
 {
-  numero: number;
   category: Category;
   cc: number | null;
   codeudor: intCodeudor | null;
   demanda: intDemanda;
   deudor: intDeudor;
+  fecha?: Date;
   idProcesos: number[] | null;
   llaveProceso: null | string;
-  tipoProceso: TipoProceso;
-  fecha?: Date;
+  nombre: string;
+  numero: number;
   procesos?: intProceso[];
+  tipoProceso: TipoProceso;
   ultimaActuacion?: intActuacion;
 }
 

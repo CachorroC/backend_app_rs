@@ -82,3 +82,44 @@ export async function notasCollection() {
 
   return notas;
 }
+
+
+export async function actuacionesCollection () {
+  const client = await clientPromise;
+
+  if ( !client ) {
+    throw new Error(
+      'no hay cliente mongólico'
+    );
+  }
+
+  const db = client.db(
+    'RyS'
+  );
+
+  const notas = db.collection<Nota>(
+    'Actuaciones'
+  );
+
+  return notas;
+}
+
+export async function procesosCollection () {
+  const client = await clientPromise;
+
+  if ( !client ) {
+    throw new Error(
+      'no hay cliente mongólico'
+    );
+  }
+
+  const db = client.db(
+    'RyS'
+  );
+
+  const procesos = db.collection<Nota>(
+    'Procesos'
+  );
+
+  return procesos;
+}

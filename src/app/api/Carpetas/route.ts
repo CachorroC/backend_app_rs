@@ -21,14 +21,25 @@ export async function GET () {
       }
     );
     return NextResponse.json(
-      carpetas
+      carpetas, {
+        status    : 200,
+        statusText: 'OK',
+        headers   : {
+          'Content-Type': 'application/json'
+        }
+      }
     );
   } catch ( error ) {
     console.error(
       error
     );
     return NextResponse.json(
-      error
+      JSON.stringify(
+        error, null, 2
+      ), {
+        statusText: 'NOT_FOUND',
+        status    : 404
+      }
     );
   }
 }

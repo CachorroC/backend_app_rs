@@ -52,14 +52,19 @@ export const fixFechas = (
 export const sleep = (
   ms: number
 ) => {
+  console.log(
+    `timein: ${ ms }`
+  );
   return new Promise(
     (
       resolve
     ) => {
-      const newMs = ms * 100;
+      console.log(
+        `timeout: ${ ms }`
+      );
 
       return setTimeout(
-        resolve, newMs
+        resolve, ms
       );
     }
   );
