@@ -1,7 +1,8 @@
 import { carpetasCollection } from '#@/lib/connection/collections';
 import { prisma } from '#@/lib/connection/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { Data, intActuacion } from 'types/actuaciones';
+import {  intActuacion } from 'types/actuaciones';
+import { ConsultaActuacion } from '../../../../../../lib/types/actuaciones';
 
 export async function GET (
   req: NextRequest, {
@@ -31,7 +32,7 @@ export async function GET (
 
     }
 
-    const data = ( await request.json() ) as Data;
+    const data = ( await request.json() ) as ConsultaActuacion;
 
     const {
       actuaciones
@@ -208,8 +209,16 @@ async function updateActuaciones (
             )
             ,
             ultimaActuacion: ultimaActuacion.actuacion === 'Fijacion estado'
-              ? penUltimaActuacion
-              : ultimaActuacion,
+              ? {
+                  ...penUltimaActuacion,
+                  isUltimaAct: penUltimaActuacion.cant === penUltimaActuacion.consActuacion,
+                  idProceso  : idProceso
+                }
+              : {
+                  ...ultimaActuacion,
+                  isUltimaAct: ultimaActuacion.cant === ultimaActuacion.consActuacion,
+                  idProceso  : idProceso
+                },
           },
         },
         {

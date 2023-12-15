@@ -1,4 +1,4 @@
-import { CarpetaRaw } from 'types/int-carpeta';
+import { CarpetaRaw } from 'types/carpetas';
 
 
 const Carpetas: CarpetaRaw[] = [

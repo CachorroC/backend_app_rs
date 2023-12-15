@@ -1,0 +1,405 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Carpeta": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "default": "SinEspecificar",
+          "enum": [
+            "Terminados",
+            "LiosJuridicos",
+            "Bancolombia",
+            "Reintegra",
+            "Insolvencia",
+            "SinEspecificar",
+            "todos"
+          ]
+        },
+        "fecha": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "idProcesos": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "llaveProceso": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "integer"
+        },
+        "revisado": {
+          "type": "boolean",
+          "default": false
+        },
+        "terminado": {
+          "type": "boolean",
+          "default": false
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ultimaActuacion": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Actuacion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Nota"
+          }
+        },
+        "procesos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Proceso"
+          }
+        },
+        "tareas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tarea"
+          }
+        }
+      }
+    },
+    "Nota": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "pathname": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "carpeta": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Carpeta"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Tarea": {
+      "type": "object",
+      "properties": {
+        "complete": {
+          "type": "boolean",
+          "default": false
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dueDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "subTareas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubTarea"
+          }
+        },
+        "Carpeta": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Carpeta"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "SubTarea": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "isComplete": {
+          "type": "boolean",
+          "default": false
+        },
+        "text": {
+          "type": "string"
+        },
+        "Tarea": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Tarea"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Actuacion": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "actuacion": {
+          "type": "string"
+        },
+        "anotacion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cant": {
+          "type": "integer"
+        },
+        "carpetaNumero": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "codRegla": {
+          "type": "string"
+        },
+        "conDocumentos": {
+          "type": "boolean"
+        },
+        "consActuacion": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fechaActuacion": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fechaFinal": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "fechaInicial": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "fechaRegistro": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idProceso": {
+          "type": "integer"
+        },
+        "idRegActuacion": {
+          "type": "integer"
+        },
+        "isUltimaAct": {
+          "type": "boolean"
+        },
+        "llaveProceso": {
+          "type": "string"
+        },
+        "proceso": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Proceso"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "carpetas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Carpeta"
+          }
+        }
+      }
+    },
+    "Juzgado": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "tipo": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "procesos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Proceso"
+          }
+        }
+      }
+    },
+    "Proceso": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "cantFilas": {
+          "type": "integer"
+        },
+        "departamento": {
+          "type": "string"
+        },
+        "despacho": {
+          "type": "string"
+        },
+        "esPrivado": {
+          "type": "boolean"
+        },
+        "fechaProceso": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "fechaUltimaActuacion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "idConexion": {
+          "type": "integer"
+        },
+        "idProceso": {
+          "type": "integer"
+        },
+        "llaveProceso": {
+          "type": "string"
+        },
+        "sujetosProcesales": {
+          "type": "string"
+        },
+        "actuaciones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Actuacion"
+          }
+        },
+        "carpeta": {
+          "$ref": "#/definitions/Carpeta"
+        },
+        "juzgado": {
+          "$ref": "#/definitions/Juzgado"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "carpeta": {
+      "$ref": "#/definitions/Carpeta"
+    },
+    "nota": {
+      "$ref": "#/definitions/Nota"
+    },
+    "tarea": {
+      "$ref": "#/definitions/Tarea"
+    },
+    "subTarea": {
+      "$ref": "#/definitions/SubTarea"
+    },
+    "actuacion": {
+      "$ref": "#/definitions/Actuacion"
+    },
+    "juzgado": {
+      "$ref": "#/definitions/Juzgado"
+    },
+    "proceso": {
+      "$ref": "#/definitions/Proceso"
+    }
+  }
+}

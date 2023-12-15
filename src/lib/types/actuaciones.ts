@@ -4,25 +4,19 @@
 //
 //   const consultaActuacion = Convert.toConsultaActuacion(json);
 
-export interface ConsultaActuacion {
-  actuaciones: intActuacion[];
-  paginacion: Paginacion;
-}
+import { Data } from './procesos';
 
 export type Message =
   | 'OK'
   | 'Object reference not set to an instance of an object.'
   | 'No se pueden ver actuaciones de un proceso privado';
 
-export interface Data {
+export interface ConsultaActuacion {
   actuaciones: intActuacion[];
   paginacion: Paginacion;
 }
 
-export interface intActuacion
-{
-  carpetaNumero: number | null;
-  createdAt: Date;
+export interface intActuacion {
   idRegActuacion: number;
   llaveProceso: string;
   consActuacion: number;
@@ -30,12 +24,20 @@ export interface intActuacion
   actuacion: string;
   anotacion: null | string;
   fechaInicial: Date | null;
+  carpetaNumero: number | null;
+  createdAt: Date;
   fechaFinal: Date | null;
   fechaRegistro: Date;
   codRegla: CodRegla;
   conDocumentos: boolean;
   cant: number;
 
+}
+
+export interface outActuacion extends intActuacion
+{
+
+  createdAt: Date
   idProceso: number;
   isUltimaAct: boolean;
 }

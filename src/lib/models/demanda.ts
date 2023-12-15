@@ -1,14 +1,15 @@
-import { intJuzgado } from 'types/carpetas';
-import { DemandaRaw, IntDemanda,  TipoProceso, TipoProcesoRaw, intNotificacion,  rawNotificacion } from 'types/int-carpeta';
-import { despachosList } from '../data/despachos';
-import { Juzgado } from '@prisma/client';
+import { Juzgado } from 'types/int-carpeta';
+import { fechaPresentacionBuilder, fixSingleFecha } from './idk';
+import { Demanda, DemandaDepartamento, DemandaRaw, MedidasCautelares, Notificacion, Proceso, TipoProceso } from 'types/carpetas';
+import { ClassNotificacion } from './notificacion';
 import { intProceso } from 'types/procesos';
+import { despachosList } from '../data/despachos';
 
 
 const Despachos = despachosList();
 
 export function tipoProcesoBuilder (
-  tipoProceso?: TipoProcesoRaw
+  tipoProceso?: string
 ): TipoProceso {
   if ( !tipoProceso ) {
     return 'SINGULAR';
@@ -58,77 +59,106 @@ function vencimientoPagareFixer (
     return [];
   }
 
-  let stringPagare;
+  const isNumber = typeof rawVencimientoPagare === 'number';
 
-  if ( typeof rawVencimientoPagare === 'number' ) {
-    stringPagare = rawVencimientoPagare.toString();
-  } else {
-    stringPagare = rawVencimientoPagare;
+
+  if ( isNumber ) {
+    return [
+      new Date(
+        rawVencimientoPagare
+      )
+    ];
   }
 
-  const pagaresDateSet = new Set<Date>();
+  const {
+    length: rawVencimientoPagareLength
+  } = rawVencimientoPagare;
 
-  const matcherPagare = stringPagare.split(
-    '//'
-  );
-  /* console.log(
-    `hay ${ matcherPagare?.length } pagarés en este proceso`
-  ); */
-
-  for ( const pagare of matcherPagare ) {
-    const newPagareString = pagare.trim()
-      .replace(
-        '/', '-'
-      );
-
-    const regexMatchStringYear = newPagareString.match(
-      /\d{4}/g
+  if ( rawVencimientoPagareLength <= 12 ) {
+    const fechaFixed = fixSingleFecha(
+      rawVencimientoPagare
     );
 
-    const regexMatchStringMonth = newPagareString.match(
-      /-\d{1,2}-/g
-    );
-    console.log(
-      regexMatchStringYear
-    );
-
-    const monthConGuiones = regexMatchStringMonth
-      ? regexMatchStringMonth[ 0 ]
-      : '-01-';
-
-    const month = monthConGuiones.replaceAll(
-      '-', ''
-    );
-
-    const year = regexMatchStringYear
-      ? regexMatchStringYear[ 0 ]
-      : '2015';
-
-    const stringDate = new Date(
-      Number(
-        year
-      ), Number(
-        month
-      ) - 1
-    );
-
-    /*  console.log(
-      `la nueva fecha del pagaré arrojó: ${ stringDate.toDateString() }`,
-    ); */
-
-    if ( !stringDate || stringDate.toString() === 'Invalid Date' ) {
-      console.log(
-        `stringDate is ${ stringDate.toLocaleDateString() } es ${ newPagareString }`
-      );
+    if ( !fechaFixed || fechaFixed.toString() === 'Invalid Date' ) {
+      return [];
     }
 
-    pagaresDateSet.add(
-      stringDate
+    return [
+      fechaFixed
+    ];
+  }
+
+  const fechasSet = new Set<Date>();
+
+  const [
+    firstFecha,
+    secondFecha,
+    thirdFecha,
+    fourthFecha,
+  ] = rawVencimientoPagare.split(
+    '//'
+  );
+
+  if ( firstFecha && firstFecha.length <= 12 ) {
+
+    //* Es una la primer fecha de presentacion
+    const fechaFixed = fixSingleFecha(
+      firstFecha
     );
+
+    if ( fechaFixed ) {
+      fechasSet.add(
+        fechaFixed
+      );
+    }
+  }
+
+  if ( secondFecha && secondFecha.length <= 12 ) {
+
+    //* Es una la primer fecha de presentacion
+    const fechaFixed = fixSingleFecha(
+      secondFecha
+    );
+
+    if ( fechaFixed ) {
+      fechasSet.add(
+        fechaFixed
+      );
+    }
+  }
+
+  if ( thirdFecha && thirdFecha.length <= 12 ) {
+
+    //* Es una la primer fecha de presentacion
+    const fechaFixed = fixSingleFecha(
+      thirdFecha
+    );
+
+    if ( fechaFixed ) {
+      fechasSet.add(
+        fechaFixed
+      );
+    }
+  }
+
+
+  if ( fourthFecha && fourthFecha.length <= 12 ) {
+
+
+    //* Es una la primer fecha de presentacion
+    const fechaFixed = fixSingleFecha(
+      fourthFecha
+    );
+
+    if ( fechaFixed ) {
+      fechasSet.add(
+        fechaFixed
+      );
+    }
   }
 
   return Array.from(
-    pagaresDateSet
+    fechasSet
   );
 }
 
@@ -154,9 +184,6 @@ function capitalBuilder (
   const commaTaker = dotTaker.replaceAll(
     ',', ''
   );
-  /* console.log(
-    commaTaker
-  ); */
 
   return Number(
     commaTaker
@@ -164,13 +191,13 @@ function capitalBuilder (
 }
 
 export function juzgadosByProceso (
-  procesos: intProceso[]
+  procesos: Proceso[]
 ) {
   if ( procesos.length === 0 ) {
     return [];
   }
 
-  const juzgados = new Set<intJuzgado>();
+  const juzgados = new Set<Juzgado>();
 
   for ( const proceso of procesos ) {
     const newJ = new NewJuzgado(
@@ -186,13 +213,13 @@ export function juzgadosByProceso (
   );
 }
 
-export class NewJuzgado implements intJuzgado {
+export class NewJuzgado implements Juzgado {
   constructor (
     proceso: intProceso
   ) {
     const matchedDespacho = Despachos.find(
       (
-        despacho
+        despacho: { nombre: string; }
       ) => {
         const nDesp = despacho.nombre
           .toLowerCase()
@@ -220,7 +247,8 @@ export class NewJuzgado implements intJuzgado {
 
         if ( indexOfDesp >= 0 ) {
           console.log(
-            `procesos despacho is in despachos ${ indexOfDesp + 1 }`
+            `procesos despacho is in despachos ${ indexOfDesp + 1
+            }`
           );
         }
 
@@ -255,8 +283,9 @@ export class NewJuzgado implements intJuzgado {
   url: string;
 }
 
-export class ClassDemanda implements IntDemanda {
-  constructor(
+export class ClassDemanda implements Demanda {
+  obligacion: string[];
+  constructor (
     {
       capitalAdeudado,
       entregaGarantiasAbogado,
@@ -267,16 +296,14 @@ export class ClassDemanda implements IntDemanda {
       mandamientoPago,
       municipio,
       obligacion,
+      notificacion,
       radicado,
       llaveProceso,
       medidasCautelares,
-      notificacion,
       vencimientoPagare,
     }: DemandaRaw,
-    numero: number,
-    proceso?: intProceso
   ) {
-    const obligacionesSet = new Set<string | number>();
+    const obligacionesSet = new Set<string>();
 
     if ( obligacion ) {
       const {
@@ -285,13 +312,17 @@ export class ClassDemanda implements IntDemanda {
 
       if ( A ) {
         obligacionesSet.add(
-          A
+          String(
+            A
+          )
         );
       }
 
       if ( B ) {
         obligacionesSet.add(
-          B
+          String(
+            B
+          )
         );
       }
     }
@@ -299,6 +330,11 @@ export class ClassDemanda implements IntDemanda {
     this.fechaPresentacion = fechaPresentacionBuilder(
       fechaPresentacion
     );
+    this.notificacion = notificacion
+      ? new ClassNotificacion(
+        notificacion
+      )
+      : null;
 
     const dateMandamientoPago = mandamientoPago
       ? new Date(
@@ -341,9 +377,7 @@ export class ClassDemanda implements IntDemanda {
       }
     }
 
-    this.llaveProceso = llaveProceso
-      ? llaveProceso
-      : null;
+    this.expediente = llaveProceso;
 
     this.capitalAdeudado = capitalBuilder(
       capitalAdeudado
@@ -370,43 +404,8 @@ export class ClassDemanda implements IntDemanda {
       vencimientoPagare
     );
     this.departamento = departamento
-      ? departamento
+      ? departamento as DemandaDepartamento
       : null;
-    this.juzgado = proceso
-      ? new NewJuzgado(
-        proceso
-      )
-      : null;
-    this.idProceso = proceso
-      ? proceso.idProceso
-      : numero;
-    this.idConexion = proceso
-      ? proceso.idConexion
-      : null;
-    this.fechaProceso = proceso
-      ? proceso.fechaProceso
-        ? new Date(
-          proceso.fechaProceso
-        )
-        : null
-      : null;
-    this.fechaUltimaActuacion = proceso
-      ? proceso.fechaUltimaActuacion
-        ? new Date(
-          proceso.fechaUltimaActuacion
-        )
-        : null
-      : null;
-    this.sujetosProcesales = proceso
-      ? proceso.sujetosProcesales
-      : null;
-    this.esPrivado = proceso
-      ? proceso.esPrivado
-      : null;
-    this.cantFilas = proceso
-      ? proceso.cantFilas
-      : null;
-
     this.medidasCautelares = medidasCautelares
       ? {
           fechaOrdenaMedida: medidasCautelares.fechaOrdenaMedidas
@@ -419,343 +418,21 @@ export class ClassDemanda implements IntDemanda {
             : null
         }
       : null;
-
-    this.notificacion = notificacion
-      ? new ClassNotificacion(
-        notificacion
-      )
-      : null;
+    this.llaveProceso = llaveProceso;
   }
+  llaveProceso: string;
+  notificacion: Notificacion | null;
+  medidasCautelares: MedidasCautelares | null;
   capitalAdeudado: number | null;
-  departamento: string | null;
+  departamento: DemandaDepartamento | null;
   entregaGarantiasAbogado: Date | null;
-  tipoProceso: TipoProceso;
-  mandamientoPago: Date | null;
   etapaProcesal: string | null;
+  expediente: string;
   fechaPresentacion: Date[];
+  mandamientoPago: Date | null;
   municipio: string | null;
-  obligacion: ( string | number )[];
   radicado: string | null;
-  vencimientoPagare: ( Date | null )[];
-  juzgado: Juzgado | null;
-  idProceso: number;
-  idConexion: number | null;
-  llaveProceso: string | null;
-  fechaProceso: Date | null;
-  fechaUltimaActuacion: Date | null;
-  sujetosProcesales: string | null;
-  esPrivado: boolean | null;
-  cantFilas: number | null;
-  notificacion: intNotificacion | null;
-  medidasCautelares: { fechaOrdenaMedida: Date | null; medidaSolicitada: string | null; } | null;
-}
+  tipoProceso: TipoProceso;
+  vencimientoPagare: Date[];
 
-export class ClassNotificacion implements intNotificacion {
-  constructor(
-    notificacion: rawNotificacion
-  ) {
-    const {
-      fisico, certimail, autoNotificado
-    }
-      = notificacion;
-    this.certimail = certimail
-      ? certimail === 'SI'
-        ? true
-        : false
-      : null;
-    this.fisico = fisico
-      ? fisico === 'SI'
-        ? true
-        : false
-      : null;
-    this.autoNotificado = autoNotificado
-      ? typeof autoNotificado === 'number'
-        ? autoNotificado.toString()
-        : autoNotificado
-      : null;
-
-    const notifiersBuilder = new Map<number, {
-      tipo: '291' | '292';
-      fechaRecibido: Date | null;
-      resultado: boolean | null;
-      fechaAporta: Date | null;
-    }>();
-
-    const the291 = notificacion[ '291' ];
-
-    if ( the291 ) {
-      const {
-        fechaRecibido, resultado, fechaAporta
-      }
-        = the291;
-
-      const newFechaRecibido = fechaRecibido
-        ? fixSingleFecha(
-          typeof fechaRecibido === 'number'
-            ? fechaRecibido.toString()
-            : fechaRecibido
-        )
-        : null;
-
-      const newFechaAporta = fechaAporta
-        ? fixSingleFecha(
-          typeof fechaAporta === 'number'
-            ? fechaAporta.toString()
-            : fechaAporta
-        )
-        : null;
-
-      const newResultado = resultado
-        ? resultado === 'POSITIVO'
-          ? true
-          : false
-        : null;
-      notifiersBuilder.set(
-        291,
-        {
-          tipo         : '291'
-          , fechaRecibido: newFechaRecibido
-          , fechaAporta  : newFechaAporta
-          , resultado    : newResultado,
-        }
-      );
-    }
-
-    const the292 = notificacion[ '292' ];
-
-    if ( the292 ) {
-      const {
-        fechaRecibido, resultado, fechaAporta
-      }
-        = the292;
-
-      const newFechaRecibido = fechaRecibido
-        ? fixSingleFecha(
-          fechaRecibido
-        )
-        : null;
-
-      const newFechaAporta = fechaAporta
-        ? fixSingleFecha(
-          typeof fechaAporta === 'number'
-            ? fechaAporta.toString()
-            : fechaAporta
-        )
-        : null;
-
-      const newResultado = resultado
-        ? resultado === 'POSITIVO'
-          ? true
-          : false
-        : null;
-      notifiersBuilder.set(
-        292,
-        {
-          tipo         : '292'
-          , fechaRecibido: newFechaRecibido
-          , fechaAporta  : newFechaAporta
-          , resultado    : newResultado,
-        }
-      );
-    }
-
-    this.notifiers = Array.from(
-      notifiersBuilder.values()
-    );
-  }
-  certimail: boolean | null;
-  fisico: boolean | null;
-  autoNotificado: string | null;
-  notifiers: {
-    tipo: '291' | '292';
-    fechaRecibido: Date | null;
-    resultado: boolean | null;
-    fechaAporta: Date | null;
-  }[];
-}
-
-
-
-export function fechaPresentacionBuilder(
-  rawFechaPresentacion?: string | number
-) {
-  if ( !rawFechaPresentacion ) {
-    return [];
-  }
-
-  const isNumber = typeof rawFechaPresentacion === 'number';
-
-  if ( isNumber ) {
-    return [
-      new Date(
-        rawFechaPresentacion
-      )
-    ];
-  }
-
-  const {
-    length: rawFechaPresentacionLength
-  }= rawFechaPresentacion;
-  console.log(
-    rawFechaPresentacionLength
-  );
-
-  if ( rawFechaPresentacionLength <= 12 ) {
-    //* Hay solamente una fecha
-    const fechaFixed = fixSingleFecha(
-      rawFechaPresentacion
-    );
-
-    if ( !fechaFixed ) {
-      return [];
-    }
-
-    return [
-      fechaFixed
-    ];
-  }
-
-  const fechasSet = new Set<Date>();
-
-  const [
-    firstFecha,
-    secondFecha,
-    thirdFecha,
-    fourthFecha,
-  ] = rawFechaPresentacion.split(
-    '//'
-  );
-
-
-
-  if ( firstFecha && firstFecha.length <= 12 ) {
-    console.log(
-      firstFecha.length
-    );
-
-    //* Es una la primer fecha de presentacion
-    const fechaFixed = fixSingleFecha(
-      firstFecha
-    );
-
-    if ( fechaFixed ) {
-      fechasSet.add(
-        fechaFixed
-      );
-    }
-  }
-
-  if ( secondFecha && secondFecha.length <= 12 ) {
-    console.log(
-      secondFecha.length
-    );
-
-    //* Es una la primer fecha de presentacion
-    const fechaFixed = fixSingleFecha(
-      secondFecha
-    );
-
-    if ( fechaFixed ) {
-      fechasSet.add(
-        fechaFixed
-      );
-    }
-  }
-
-  if ( thirdFecha && thirdFecha.length <= 12 ) {
-    console.log(
-      thirdFecha.length
-    );
-
-    //* Es una la primer fecha de presentacion
-    const fechaFixed = fixSingleFecha(
-      thirdFecha
-    );
-
-    if ( fechaFixed ) {
-      fechasSet.add(
-        fechaFixed
-      );
-    }
-  }
-
-
-  if ( fourthFecha && fourthFecha.length <= 12 ) {
-    console.log(
-      fourthFecha.length
-    );
-
-    //* Es una la primer fecha de presentacion
-    const fechaFixed = fixSingleFecha(
-      fourthFecha
-    );
-
-    if ( fechaFixed ) {
-      fechasSet.add(
-        fechaFixed
-      );
-    }
-  }
-
-  return Array.from(
-    fechasSet
-  );
-}
-
-export function fixSingleFecha(
-  rawFecha: string
-) {
-  const [
-    rawDay,
-    rawMonth,
-    rawYear
-  ] = rawFecha
-    .trim()
-    .split(
-      '/'
-    );
-
-  if ( !rawYear || !rawMonth ) {
-    return null;
-  }
-
-  console.log(
-    rawDay.padStart(
-      2, '0'
-    )
-  );
-  console.log(
-    rawMonth
-  );
-  console.log(
-    `rawYear ${ rawYear } es ${ rawYear.padStart(
-      4, '20'
-    ) }`
-  );
-
-  const stringDate = new Date(
-    Number(
-      rawYear.padStart(
-        4, '20'
-      )
-    ),
-    Number(
-      rawMonth
-    ) - 1,
-    Number(
-      rawDay.padStart(
-        2, '0'
-      )
-    )
-  );
-
-  console.log(
-    `la nueva fecha del pagaré arrojó: ${ stringDate.toDateString() }`
-  );
-
-  if ( stringDate.toString() === 'Invalid Date' ) {
-    return null;
-  }
-
-  return stringDate;
 }

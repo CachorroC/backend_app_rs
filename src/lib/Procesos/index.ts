@@ -1,9 +1,10 @@
 import { cache } from 'react';
 import { sleep } from 'project/helper';
-import { IntCarpeta, intJuzgado } from 'types/carpetas';
+import { IntCarpeta } from 'types/carpetas';
 import { Despacho } from 'types/despachos';
 import { intProceso, ConsultaNumeroRadicacion, Data, Message } from 'types/procesos';
 import clientPromise from '../connection/mongodb';
+import { Juzgado } from 'types/int-carpeta';
 
 export const getDespachos = cache(
   async () => {
@@ -85,7 +86,7 @@ export async function newJuzgado(
     matchedId?.toString()
   );
 
-  const newJuzgado: intJuzgado = {
+  const newJuzgado: Juzgado = {
     id  : newId ?? 0,
     tipo: matchedDespacho
       ? matchedDespacho.nombre
@@ -118,11 +119,11 @@ export async function fetchProceso(
     );
 
     if ( !req.ok ) {
-      const jsonError = ( await req.json() ) as ConsultaNumeroRadicacion;
+      const jsonError = ( await req.json() ) as Data;
       return jsonError;
     }
 
-    const json = ( await req.json() ) as Data;
+    const json = ( await req.json() ) as ConsultaNumeroRadicacion;
 
     const {
       procesos
@@ -132,7 +133,7 @@ export async function fetchProceso(
       procesos
     );
 
-    const responseReturn: ConsultaNumeroRadicacion = {
+    const responseReturn: Data = {
       StatusCode: req.status,
       Message   : req.statusText as Message,
       procesos  : procesos
@@ -254,8 +255,21 @@ export async function updateProcesos(
           ]
         }, {
           $addToSet: {
-            idProcesos        : idProceso,
-            procesos          : proceso,
+            idProcesos: idProceso,
+            procesos  : {
+              ...proceso,
+              juzgado     : juzgado,
+              fechaProceso: proceso.fechaProceso
+                ? new Date(
+                  proceso.fechaProceso
+                )
+                : null,
+              fechaUltimaActuacion: proceso.fechaUltimaActuacion
+                ? new Date(
+                  proceso.fechaUltimaActuacion
+                )
+                : null,
+            },
             'demanda.juzgados': juzgado
           },
           $set: {

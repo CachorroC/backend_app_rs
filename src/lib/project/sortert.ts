@@ -1,5 +1,6 @@
 import 'server-only';
 import { Category, MonCarpeta } from '../types/carpetas';
+import { IntCarpeta } from 'types/int-carpeta';
 
 export interface intAction {
   type: ActionType;
@@ -21,7 +22,6 @@ export function carpetasSorter(
     'todos',
     'Bancolombia',
     'Reintegra',
-    'sinEspecificar',
     'LiosJuridicos',
     'Insolvencia',
     'Terminados',

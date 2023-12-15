@@ -1,3 +1,4 @@
+import { carpetasCollection } from '#@/lib/connection/collections';
 import { prisma } from '#@/lib/connection/prisma';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,15 +19,11 @@ export async function GET (
           numero: numero
         },
         include: {
-          deudor         : true,
           ultimaActuacion: true,
-          juzgados       : true,
-          procesos       : true,
           notas          : true,
-          demandas       : {
+          procesos       : {
             include: {
-              notificacion     : true,
-              medidasCautelares: true
+              juzgado: true
             }
           },
           tareas: {
@@ -37,8 +34,28 @@ export async function GET (
         }
       }
     );
+
+    const collection = await carpetasCollection();
+
+    const mongoCarpeta = await collection.findOne(
+      {
+        numero: Number(
+          params.numero
+        )
+      }
+    );
+
+    if ( !mongoCarpeta ) {
+      return NextResponse.json(
+        carpeta
+      );
+    }
+
     return NextResponse.json(
-      carpeta
+      {
+        ...mongoCarpeta,
+        ...carpeta
+      }
     );
   } catch ( error ) {
     console.error(

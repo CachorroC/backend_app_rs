@@ -1,5 +1,5 @@
-import { intDeudor } from 'types/carpetas';
-import { DeudorRaw } from 'types/int-carpeta';
+
+import { Deudor, DeudorRaw } from 'types/carpetas';
 
 
 export class Tel {
@@ -45,7 +45,7 @@ export class Tel {
   }
 }
 
-export class ClassDeudor implements intDeudor {
+export class ClassDeudor implements Deudor {
   constructor (
     {
       cedula, direccion, email, nombre, telefono = ''

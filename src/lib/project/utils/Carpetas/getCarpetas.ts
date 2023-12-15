@@ -1,6 +1,7 @@
 
 import clientPromise from '#@/lib/connection/mongodb';
-import { IntCarpeta, MonCarpeta } from '#@/lib/types/carpetas';
+import { prisma } from '#@/lib/connection/prisma';
+import { IntCarpeta, } from '#@/lib/types/carpetas';
 
 export async function getCarpetas() {
 
@@ -27,15 +28,42 @@ export async function getCarpetas() {
     .toArray();
 
 
+  const prismaCarpetas = await prisma.carpeta.findMany(
+    {
+      include: {
+        ultimaActuacion: true,
+        notas          : true,
+        procesos       : {
+          include: {
+            juzgado: true
+          }
+        },
+        tareas: {
+          include: {
+            subTareas: true
+          }
+        }
+      }
+    }
+  );
+
+
   return carpetasRaw.map(
     (
       carpeta
     ) => {
-      return ( {
+
+      const matchedObject = prismaCarpetas.find(
+        (
+          obj
+        ) => {
+          return obj.numero === carpeta.numero;
+        }
+      );
+      return {
         ...carpeta,
-        _id   : carpeta._id.toString(),
-        nombre: `${ carpeta.deudor.primerNombre } ${ carpeta.deudor.segundoNombre } ${ carpeta.deudor.primerApellido } ${ carpeta.deudor.segundoApellido }`
-      } ) as MonCarpeta;
+        ...matchedObject
+      };
     }
   );
 }

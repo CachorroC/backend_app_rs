@@ -167,8 +167,16 @@ export async function  updateActuaciones(
               ultimaActuacion.actuacion
             ),
             ultimaActuacion: ultimaActuacion.actuacion === 'Fijacion estado'
-              ? penUltimaActuacion
-              : ultimaActuacion,
+              ? {
+                  ...penUltimaActuacion,
+                  isUltimaAct: penUltimaActuacion.cant === penUltimaActuacion.consActuacion,
+                  idProceso  : idProceso
+                }
+              : {
+                  ...ultimaActuacion,
+                  isUltimaAct: ultimaActuacion.cant === ultimaActuacion.consActuacion,
+                  idProceso  : idProceso
+                },
           },
         },
         {

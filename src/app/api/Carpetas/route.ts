@@ -1,20 +1,17 @@
+import { carpetasCollection } from '#@/lib/connection/collections';
 import { prisma } from '#@/lib/connection/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET () {
   try {
-    const carpetas = await prisma.carpeta.findMany(
+    const prismaCarpetas = await prisma.carpeta.findMany(
       {
         include: {
-          deudor         : true,
           ultimaActuacion: true,
-          juzgados       : true,
-          procesos       : true,
           notas          : true,
-          demandas       : {
+          procesos       : {
             include: {
-              notificacion     : true,
-              medidasCautelares: true
+              juzgado: true
             }
           },
           tareas: {
@@ -25,8 +22,35 @@ export async function GET () {
         }
       }
     );
+
+    const collection = await carpetasCollection();
+
+    const mongoCarpetas = await collection.find()
+      .toArray();
+
+    const mergedArray = mongoCarpetas.map(
+      (
+        item
+      ) => {
+        const matchedObject = prismaCarpetas.find(
+          (
+            obj
+          ) => {
+            return obj.numero === item.numero;
+          }
+        );
+        return {
+          ...item,
+          ...matchedObject
+        };
+      }
+    );
+
+    console.log(
+      mergedArray
+    );
     return NextResponse.json(
-      carpetas, {
+      mergedArray, {
         status    : 200,
         statusText: 'OK',
         headers   : {
