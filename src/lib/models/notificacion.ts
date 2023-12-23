@@ -1,10 +1,29 @@
-import { Notificacion, rawNotificacion, The291 } from 'types/carpetas';
+
 import { fixSingleFecha } from './idk';
+import { CarpetaRaw } from '../types/raw-carpeta';
+import { Notificacion, Notifier } from '../types/carpetas';
 
 export class ClassNotificacion implements Notificacion {
-  constructor(
-    notificacion: rawNotificacion
+  constructor (
+    {
+      demanda, numero
+    }: CarpetaRaw
   ) {
+    this.id = numero;
+    this.demandaId = numero;
+
+    const {
+      notificacion
+    } = demanda;
+
+    if ( !notificacion ) {
+
+      this.certimail = false;
+      this.autoNotificado = null,
+      this.fisico = false;
+      return;
+    }
+
     const {
       fisico, certimail, autoNotificado
     }
@@ -13,12 +32,12 @@ export class ClassNotificacion implements Notificacion {
       ? certimail === 'SI'
         ? true
         : false
-      : null;
+      : false;
     this.fisico = fisico
       ? fisico === 'SI'
         ? true
         : false
-      : null;
+      : false;
     this.autoNotificado = autoNotificado
       ? typeof autoNotificado === 'number'
         ? autoNotificado.toString()
@@ -55,11 +74,15 @@ export class ClassNotificacion implements Notificacion {
           ? true
           : false
         : null;
-      this[ '291' ] = {
-        fechaRecibido: newFechaRecibido
-        , fechaAporta  : newFechaAporta
-        , resultado    : newResultado
-      };
+      this.notifiers.push(
+        {
+          tipo          : '291',
+          notificacionId: numero,
+          fechaRecibido : newFechaRecibido
+          , fechaAporta   : newFechaAporta
+          , resultado     : newResultado
+        }
+      );
     }
 
     const the292 = notificacion[ '292' ];
@@ -89,19 +112,23 @@ export class ClassNotificacion implements Notificacion {
           ? true
           : false
         : null;
-      this[ '292' ] = {
-        fechaRecibido: newFechaRecibido
-        , fechaAporta  : newFechaAporta
-        , resultado    : newResultado
-      };
+      this.notifiers.push(
+        {
+          tipo          : '292',
+          notificacionId: numero,
+          fechaRecibido : newFechaRecibido
+          , fechaAporta   : newFechaAporta
+          , resultado     : newResultado
+        }
+      );
     }
 
 
-
   }
-  certimail: boolean | null;
-  fisico: boolean | null;
   autoNotificado: string | null;
-  '291': The291 | null;
-  '292': The291 | null;
+  demandaId: number;
+  certimail: boolean;
+  fisico: boolean;
+  id: number;
+  notifiers: Notifier[] = [];
 }

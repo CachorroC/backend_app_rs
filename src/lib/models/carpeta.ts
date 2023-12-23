@@ -1,39 +1,23 @@
-
-import {  CarpetaRaw, Category, Codeudor, TipoProceso } from 'types/carpetas';
+import { prisma } from '../connection/prisma';
+import { ConsultaActuacion, outActuacion } from '../types/actuaciones';
+import { Category, Codeudor, Demanda, Deudor, IntCarpeta,  Nota,  Tarea,  TipoProceso,  } from '../types/carpetas';
+import { ConsultaNumeroRadicacion, outProceso } from '../types/procesos';
+import { CarpetaRaw } from '../types/raw-carpeta';
 import { ClassDemanda, NewJuzgado, tipoProcesoBuilder } from './demanda';
 import { ClassDeudor } from './deudor';
-import { ConsultaNumeroRadicacion, outProceso } from 'types/procesos';
-import { ConsultaActuacion, outActuacion } from 'types/actuaciones';
-import { prisma } from '../connection/prisma';
 
-
-export class CarpetaBuilder {
-  _id: number;
-  actuaciones: outActuacion[] = [];
-  category: Category;
-  codeudor: Codeudor | null;
-  demanda: ClassDemanda;
-  deudor: ClassDeudor;
-  fecha: Date | null;
-  idProcesos: number[] = [];
-  idRegUltimaAct: number | null;
-  llaveProceso: string;
-  nombre: string;
-  numero: number;
-  procesos: outProceso[] = [];
-  revisado: boolean;
-  terminado: boolean;
-  tipoProceso: TipoProceso;
-  ultimaActuacion: outActuacion | null;
-  updatedAt: Date;
+export class CarpetaBuilder implements IntCarpeta {
 
   constructor (
-    {
-      numero, deudor, category, codeudor, demanda
-    }: CarpetaRaw
+    carpeta: CarpetaRaw
   ) {
+    const {
+      numero, deudor, category, codeudor, demanda
+    } = carpeta;
     this.numero = numero;
-    this._id = numero;
+    this._id = String(
+      deudor.cedula
+    );
     this.idRegUltimaAct = null;
     this.nombre = deudor.nombre;
     this.category = category as Category;
@@ -72,10 +56,10 @@ export class CarpetaBuilder {
       )
       : 'SINGULAR';
     this.deudor = new ClassDeudor(
-      deudor
+      carpeta
     );
     this.demanda = new ClassDemanda(
-      demanda
+      carpeta
     );
     this.terminado = category === 'Terminados'
       ? true
@@ -85,6 +69,26 @@ export class CarpetaBuilder {
     this.updatedAt = new Date();
     this.llaveProceso = demanda.llaveProceso;
   }
+  category: Category;
+  fecha: Date | null;
+  idProcesos: number[] = [];
+  idRegUltimaAct: number | null;
+  llaveProceso: string;
+  nombre: string;
+  numero: number;
+  revisado: boolean;
+  terminado: boolean;
+  tipoProceso: TipoProceso;
+  updatedAt: Date;
+  ultimaActuacion: outActuacion | null;
+  deudor: Deudor | null;
+  codeudor: Codeudor | null;
+  notas: Nota[] = [];
+  demanda: Demanda | null;
+  procesos: outProceso[] = [];
+  tareas: Tarea[] = [];
+  actuaciones: outActuacion[] = [];
+  _id: string;
   set _llaveProceso (
     expediente: string
   ) {

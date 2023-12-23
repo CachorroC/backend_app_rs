@@ -1,9 +1,10 @@
-import { Juzgado } from 'types/int-carpeta';
-import { fechaPresentacionBuilder, fixSingleFecha } from './idk';
-import { Demanda, DemandaDepartamento, DemandaRaw, MedidasCautelares, Notificacion, Proceso, TipoProceso } from 'types/carpetas';
-import { ClassNotificacion } from './notificacion';
-import { intProceso } from 'types/procesos';
 import { despachosList } from '../data/despachos';
+import { Demanda, DemandaDepartamento, Juzgado, MedidasCautelares, Notificacion,  TipoProceso } from '../types/carpetas';
+import { intProceso } from '../types/procesos';
+import { CarpetaRaw } from '../types/raw-carpeta';
+import { fechaPresentacionBuilder, fixSingleFecha } from './idk';
+import { ClassMedidasCautelares } from './medidasCautelares';
+import { ClassNotificacion } from './notificacion';
 
 
 const Despachos = despachosList();
@@ -191,7 +192,7 @@ function capitalBuilder (
 }
 
 export function juzgadosByProceso (
-  procesos: Proceso[]
+  procesos: intProceso[]
 ) {
   if ( procesos.length === 0 ) {
     return [];
@@ -284,25 +285,27 @@ export class NewJuzgado implements Juzgado {
 }
 
 export class ClassDemanda implements Demanda {
-  obligacion: string[];
   constructor (
-    {
-      capitalAdeudado,
-      entregaGarantiasAbogado,
-      etapaProcesal,
-      departamento,
-      fechaPresentacion,
-      tipoProceso,
-      mandamientoPago,
-      municipio,
-      obligacion,
-      notificacion,
-      radicado,
-      llaveProceso,
-      medidasCautelares,
-      vencimientoPagare,
-    }: DemandaRaw,
+    carpeta: CarpetaRaw,
   ) {
+    const {
+      demanda: {
+        capitalAdeudado,
+        entregaGarantiasAbogado,
+        etapaProcesal,
+        departamento,
+        fechaPresentacion,
+        tipoProceso,
+        mandamientoPago,
+        municipio,
+        obligacion,
+        radicado,
+        llaveProceso,
+        vencimientoPagare,
+      }, numero
+    } = carpeta;
+    this.carpetaNumero = numero;
+
     const obligacionesSet = new Set<string>();
 
     if ( obligacion ) {
@@ -330,11 +333,9 @@ export class ClassDemanda implements Demanda {
     this.fechaPresentacion = fechaPresentacionBuilder(
       fechaPresentacion
     );
-    this.notificacion = notificacion
-      ? new ClassNotificacion(
-        notificacion
-      )
-      : null;
+    this.notificacion =  new ClassNotificacion(
+      carpeta
+    );
 
     const dateMandamientoPago = mandamientoPago
       ? new Date(
@@ -377,13 +378,14 @@ export class ClassDemanda implements Demanda {
       }
     }
 
-    this.expediente = llaveProceso;
+    this.llaveProceso = llaveProceso;
 
     this.capitalAdeudado = capitalBuilder(
       capitalAdeudado
         ? capitalAdeudado
         : 0
-    );
+    )
+      .toString();
 
     this.tipoProceso = tipoProcesoBuilder(
       tipoProceso
@@ -406,33 +408,29 @@ export class ClassDemanda implements Demanda {
     this.departamento = departamento
       ? departamento as DemandaDepartamento
       : null;
-    this.medidasCautelares = medidasCautelares
-      ? {
-          fechaOrdenaMedida: medidasCautelares.fechaOrdenaMedidas
-            ? new Date(
-              medidasCautelares.fechaOrdenaMedidas
-            )
-            : null
-          , medidaSolicitada: medidasCautelares.medidaSolicitada
-            ? medidasCautelares.medidaSolicitada
-            : null
-        }
-      : null;
+    this.medidasCautelares = new ClassMedidasCautelares(
+      carpeta
+    );
     this.llaveProceso = llaveProceso;
+    this.despacho = null;
+    this.id = numero;
   }
-  llaveProceso: string;
-  notificacion: Notificacion | null;
-  medidasCautelares: MedidasCautelares | null;
-  capitalAdeudado: number | null;
-  departamento: DemandaDepartamento | null;
+  departamento: string | null;
+  municipio: string | null;
+  capitalAdeudado: string | null;
+  carpetaNumero: number;
+  despacho: string | null;
   entregaGarantiasAbogado: Date | null;
   etapaProcesal: string | null;
-  expediente: string;
+  llaveProceso: string;
   fechaPresentacion: Date[];
+  id: number;
   mandamientoPago: Date | null;
-  municipio: string | null;
-  radicado: string | null;
   tipoProceso: TipoProceso;
+  obligacion: string[];
+  radicado: string | null;
   vencimientoPagare: Date[];
+  notificacion: Notificacion;
+  medidasCautelares: MedidasCautelares;
 
 }
