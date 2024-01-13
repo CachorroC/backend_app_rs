@@ -162,6 +162,23 @@ export class CarpetaBuilder implements IntCarpeta {
         );
 
         try {
+
+          let idBuilder;
+
+          const cedulaAsNumber = Number(
+            this.deudor?.cedula
+          );
+
+          if ( isNaN(
+            cedulaAsNumber
+          ) ) {
+            idBuilder = Number(
+              this.numero
+            );
+          } else {
+            idBuilder = cedulaAsNumber;
+          }
+
           const prismaUpdateProceso = await prisma.proceso.upsert(
             {
               where: {
@@ -183,7 +200,8 @@ export class CarpetaBuilder implements IntCarpeta {
                       numero: this.numero
                     }
                     , create: {
-                      llaveProceso: this.llaveProceso
+                      llaveProceso: this.llaveProceso,
+                      id          : idBuilder
                       , nombre      : this.nombre
                       , fecha       : this.fecha
                       , numero      : this.numero
@@ -213,6 +231,7 @@ export class CarpetaBuilder implements IntCarpeta {
                       numero: this.numero
                     }
                     , create: {
+                      id          : idBuilder,
                       llaveProceso: this.llaveProceso
                       , nombre      : this.nombre
                       , fecha       : this.fecha

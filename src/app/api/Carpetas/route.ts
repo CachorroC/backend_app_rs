@@ -11,6 +11,7 @@ export async function GET () {
           deudor         : true,
           codeudor       : true,
           notas          : true,
+          tareas         : true,
           demanda        : {
             include: {
               notificacion: {
@@ -26,30 +27,13 @@ export async function GET () {
               juzgado: true
             }
           },
-          tareas: {
-            include: {
-              subTareas: true
-            }
-          }
         }
+
       }
     );
 
-    const newCarpetas = prismaCarpetas.map(
-      (
-        carpeta
-      ) => {
-        const {
-          id, ...newCarpeta
-        } = carpeta;
-        return {
-          ...newCarpeta,
-          _id: id
-        };
-      }
-    );
     return NextResponse.json(
-      newCarpetas, {
+      prismaCarpetas, {
         status    : 200,
         statusText: 'OK',
         headers   : {

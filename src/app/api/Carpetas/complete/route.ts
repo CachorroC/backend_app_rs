@@ -11,6 +11,7 @@ export async function GET () {
           deudor         : true,
           codeudor       : true,
           notas          : true,
+          tareas         : true,
           demanda        : {
             include: {
               notificacion     : true,
@@ -23,11 +24,6 @@ export async function GET () {
               actuaciones: true
             }
           },
-          tareas: {
-            include: {
-              subTareas: true
-            }
-          }
         }
       }
     );

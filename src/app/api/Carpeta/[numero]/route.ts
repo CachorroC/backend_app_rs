@@ -1,7 +1,6 @@
-import { carpetasCollection } from '#@/lib/connection/collections';
+
 import { prisma } from '#@/lib/connection/prisma';
-import { headers } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextResponse } from 'next/server';
 
 export async function GET (
   request: Request, {
@@ -20,40 +19,32 @@ export async function GET (
         },
         include: {
           ultimaActuacion: true,
+          deudor         : true,
+          codeudor       : true,
+          tareas         : true,
           notas          : true,
-          procesos       : {
+          demanda        : {
+            include: {
+              medidasCautelares: true,
+              notificacion     : {
+                include: {
+                  notifiers: true
+                }
+              }
+            }
+          },
+          procesos: {
             include: {
               juzgado: true
             }
           },
-          tareas: {
-            include: {
-              subTareas: true
-            }
-          }
         }
       }
     );
 
-    const collection = await carpetasCollection();
-
-    const mongoCarpeta = await collection.findOne(
-      {
-        numero: Number(
-          params.numero
-        )
-      }
-    );
-
-    if ( !mongoCarpeta ) {
-      return NextResponse.json(
-        carpeta
-      );
-    }
 
     return NextResponse.json(
       {
-        ...mongoCarpeta,
         ...carpeta
       }
     );
@@ -65,12 +56,12 @@ export async function GET (
     );
 
     return NextResponse.json(
-      error
+      null
     );
   }
 }
 
-
+/*
 export async function PUT (
   request: NextRequest, {
     params
@@ -146,4 +137,4 @@ export async function PUT (
       secondRoute  : secondRoute
     }
   );
-}
+} */

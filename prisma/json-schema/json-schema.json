@@ -5,8 +5,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
-          "default": "cedula"
+          "type": "integer"
         },
         "category": {
           "type": "string",
@@ -31,16 +30,6 @@
             "ACUMULADO"
           ]
         },
-        "codeudor": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Codeudor"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "fecha": {
           "type": [
             "string",
@@ -60,34 +49,20 @@
         "nombre": {
           "type": "string"
         },
-        "notas": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Nota"
-          }
-        },
         "numero": {
           "type": "integer"
-        },
-        "procesos": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Proceso"
-          }
         },
         "revisado": {
           "type": "boolean",
           "default": false
         },
-        "tareas": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tarea"
-          }
-        },
         "terminado": {
           "type": "boolean",
           "default": false
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
         },
         "ultimaActuacion": {
           "anyOf": [
@@ -99,14 +74,10 @@
             }
           ]
         },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "deudor": {
+        "codeudor": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Deudor"
+              "$ref": "#/definitions/Codeudor"
             },
             {
               "type": "null"
@@ -122,22 +93,40 @@
               "type": "null"
             }
           ]
-        }
-      }
-    },
-    "Deudor": {
-      "type": "object",
-      "properties": {
-        "carpeta": {
+        },
+        "deudor": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Carpeta"
+              "$ref": "#/definitions/Deudor"
             },
             {
               "type": "null"
             }
           ]
         },
+        "notas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Nota"
+          }
+        },
+        "procesos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Proceso"
+          }
+        },
+        "tareas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Task"
+          }
+        }
+      }
+    },
+    "Deudor": {
+      "type": "object",
+      "properties": {
         "cedula": {
           "type": "string"
         },
@@ -185,12 +174,7 @@
             "string",
             "null"
           ]
-        }
-      }
-    },
-    "Codeudor": {
-      "type": "object",
-      "properties": {
+        },
         "carpeta": {
           "anyOf": [
             {
@@ -200,7 +184,12 @@
               "type": "null"
             }
           ]
-        },
+        }
+      }
+    },
+    "Codeudor": {
+      "type": "object",
+      "properties": {
         "cedula": {
           "type": [
             "string",
@@ -227,6 +216,16 @@
             "string",
             "null"
           ]
+        },
+        "carpeta": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Carpeta"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
@@ -237,16 +236,6 @@
           "type": [
             "number",
             "null"
-          ]
-        },
-        "carpeta": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Carpeta"
-            },
-            {
-              "type": "null"
-            }
           ]
         },
         "departamento": {
@@ -300,26 +289,6 @@
         "tipoProceso": {
           "type": "string"
         },
-        "medidasCautelares": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/MedidasCautelares"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "notificacion": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Notificacion"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "municipio": {
           "type": [
             "string",
@@ -344,22 +313,42 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "Notificacion": {
-      "type": "object",
-      "properties": {
-        "demanda": {
+        },
+        "carpeta": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Demanda"
+              "$ref": "#/definitions/Carpeta"
             },
             {
               "type": "null"
             }
           ]
         },
+        "medidasCautelares": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MedidasCautelares"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notificacion": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Notificacion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Notificacion": {
+      "type": "object",
+      "properties": {
         "autoNotificado": {
           "type": [
             "string",
@@ -381,6 +370,16 @@
         "id": {
           "type": "integer"
         },
+        "demanda": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Demanda"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "notifiers": {
           "type": "array",
           "items": {
@@ -392,16 +391,6 @@
     "MedidasCautelares": {
       "type": "object",
       "properties": {
-        "demanda": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Demanda"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "fechaOrdenaMedida": {
           "type": [
             "string",
@@ -416,6 +405,16 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "demanda": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Demanda"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       }
@@ -440,6 +439,15 @@
         "id": {
           "type": "integer"
         },
+        "resultado": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "tipo": {
+          "type": "string"
+        },
         "notificacion": {
           "anyOf": [
             {
@@ -449,31 +457,12 @@
               "type": "null"
             }
           ]
-        },
-        "resultado": {
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "tipo": {
-          "type": "string"
         }
       }
     },
     "Nota": {
       "type": "object",
       "properties": {
-        "carpeta": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Carpeta"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "content": {
           "type": [
             "string",
@@ -503,13 +492,8 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
-        }
-      }
-    },
-    "Tarea": {
-      "type": "object",
-      "properties": {
-        "Carpeta": {
+        },
+        "carpeta": {
           "anyOf": [
             {
               "$ref": "#/definitions/Carpeta"
@@ -518,16 +502,21 @@
               "type": "null"
             }
           ]
-        },
-        "complete": {
+        }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "done": {
           "type": "boolean",
           "default": false
         },
         "content": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "createdAt": {
           "type": "string",
@@ -543,50 +532,22 @@
         "id": {
           "type": "integer"
         },
-        "subTareas": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SubTarea"
-          }
-        },
-        "title": {
+        "text": {
           "type": "string"
         },
         "updatedAt": {
           "type": "string",
           "format": "date-time"
-        }
-      }
-    },
-    "SubTarea": {
-      "type": "object",
-      "properties": {
-        "date": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "format": "date-time"
         },
-        "id": {
-          "type": "integer"
-        },
-        "isComplete": {
-          "type": "boolean",
-          "default": false
-        },
-        "Tarea": {
+        "Carpeta": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Tarea"
+              "$ref": "#/definitions/Carpeta"
             },
             {
               "type": "null"
             }
           ]
-        },
-        "text": {
-          "type": "string"
         }
       }
     },
@@ -685,17 +646,17 @@
         "id": {
           "type": "integer"
         },
-        "procesos": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Proceso"
-          }
-        },
         "tipo": {
           "type": "string"
         },
         "url": {
           "type": "string"
+        },
+        "procesos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Proceso"
+          }
         }
       }
     },
@@ -707,9 +668,6 @@
         },
         "cantFilas": {
           "type": "integer"
-        },
-        "carpeta": {
-          "$ref": "#/definitions/Carpeta"
         },
         "departamento": {
           "type": "string"
@@ -740,9 +698,6 @@
         "idProceso": {
           "type": "integer"
         },
-        "juzgado": {
-          "$ref": "#/definitions/Juzgado"
-        },
         "llaveProceso": {
           "type": "string"
         },
@@ -754,6 +709,12 @@
           "items": {
             "$ref": "#/definitions/Actuacion"
           }
+        },
+        "carpeta": {
+          "$ref": "#/definitions/Carpeta"
+        },
+        "juzgado": {
+          "$ref": "#/definitions/Juzgado"
         }
       }
     }
@@ -784,11 +745,8 @@
     "nota": {
       "$ref": "#/definitions/Nota"
     },
-    "tarea": {
-      "$ref": "#/definitions/Tarea"
-    },
-    "subTarea": {
-      "$ref": "#/definitions/SubTarea"
+    "task": {
+      "$ref": "#/definitions/Task"
     },
     "actuacion": {
       "$ref": "#/definitions/Actuacion"

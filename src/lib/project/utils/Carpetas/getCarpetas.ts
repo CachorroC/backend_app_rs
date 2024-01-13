@@ -32,17 +32,15 @@ export async function getCarpetas() {
     {
       include: {
         ultimaActuacion: true,
+        demanda        : true,
+        deudor         : true,
         notas          : true,
         procesos       : {
           include: {
             juzgado: true
           }
         },
-        tareas: {
-          include: {
-            subTareas: true
-          }
-        }
+        tareas: true
       }
     }
   );
